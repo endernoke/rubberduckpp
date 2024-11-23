@@ -1,0 +1,70 @@
+{
+  "name": "rubberduckpp",
+  "displayName": "RubberDuck++",
+  "description": "Your personal coding cheerleader - never code alone!",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "main": "./extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "RubberDuck++",
+      "properties": {
+        "rubberDuckPlusPlus.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/disable your cheerleader duck"
+        },
+        "rubberDuckPlusPlus.volume": {
+          "type": "number",
+          "default": 0.7,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Volume of encouragement (0.0 to 1.0)"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "rubberDuckPlusPlus.enable",
+        "title": "RubberDuck++: Enable Cheerleader"
+      },
+      {
+        "command": "rubberDuckPlusPlus.disable",
+        "title": "RubberDuck++: Disable Cheerleader"
+      },
+      {
+        "command": "rubberDuckPlusPlus.setVolume",
+        "title": "RubberDuck++: Adjust Volume"
+      }
+    ]
+  },
+  "dependencies": {
+    "play-sound": "^1.1.3"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.95.0",
+    "@types/mocha": "^10.0.9",
+    "@types/node": "20.x",
+    "eslint": "^9.13.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/rubberduck-plus-plus"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/rubberduck-plus-plus/issues"
+  }
+}

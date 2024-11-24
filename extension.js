@@ -10,12 +10,30 @@ let hasFocus = false;
 
 // Encouraging messages mapping
 const MESSAGES = {
-    error: 'keepGoing.mp3',        // "Don't worry, we'll fix this!"
-    success: 'victory.mp3',        // "You did it! I knew you could!"
-    largePaste: 'awesome.mp3',     // "Wow, that's a lot of code! Looking good!"
-    largeDelete: 'brave.mp3',      // "That's the spirit! Sometimes we need a fresh start!"
-    continuousTyping: 'flow.mp3',  // "You're in the zone! Keep it up!"
-    longError: 'challenge.mp3'     // "This is a tricky one, but you've got this!"
+    error: [
+        'error/error1.mp3',
+        'error/error2.mp3',
+        'error/error3.mp3',
+        'error/error4.mp3'
+    ],
+    success: [
+        'success/success1.mp3',
+        'success/success2.mp3',
+        'success/success3.mp3'
+    ],
+    paste: [
+        'paste/paste1.mp3',
+        'paste/paste1.mp3',
+        'paste/paste1.mp3'
+    ],
+    hugepaste: [
+       // 'hugepaste/hugepaste1.mp3'
+    ],
+    delete: [
+        'delete/delete1.mp3'
+    ],
+    typing: [],
+    longError: []
 };
 
 function activate(context) {
@@ -33,14 +51,14 @@ function activate(context) {
                 if (diagnostics.length > 0) {
                     const errors = diagnostics.filter(d => d.severity === vscode.DiagnosticSeverity.Error);
                     if (errors.length > 0) {
-                        playSound(MESSAGES.error);
+                        playSound('error');
                         lastErrorTime = Date.now();
                         consecutiveErrors++;
 
                         // Check for long error messages
                         const longErrors = errors.filter(e => e.message.length > 200);
                         if (longErrors.length > 0) {
-                            playSound(MESSAGES.longError);
+                            playSound('longError');
                         }
                     }
                 }
@@ -53,7 +71,7 @@ function activate(context) {
         vscode.debug.onDidStartDebugSession(() => {
             const timeSinceLastError = Date.now() - lastErrorTime;
             if (consecutiveErrors >= 3 && timeSinceLastError < 300000) { // 5 minutes
-                playSound(MESSAGES.success);
+                playSound('success');
                 consecutiveErrors = 0;
             }
         })
@@ -78,14 +96,22 @@ function activate(context) {
             if (changes.length === 1 && changes[0].text.length > 500) {
                 const timeSinceFocus = Date.now() - lastPasteTime;
                 if (hasFocus && timeSinceFocus < 2000) {
-                    playSound(MESSAGES.largePaste);
+                    playSound("paste");
+                }
+            }
+
+            // Check for huge paste operations
+            if (changes.length === 1 && changes[0].text.length > 1000) {
+                const timeSinceFocus = Date.now() - lastPasteTime;
+                if (hasFocus && timeSinceFocus < 2000) {
+                    playSound("hugepaste");
                 }
             }
 
             // Check for large deletions
             if (changes.length === 1 && changes[0].text === '' && 
                 changes[0].rangeLength > 500) {
-                playSound(MESSAGES.largeDelete);
+                playSound("delete");
             }
 
             // Handle continuous typing
@@ -94,9 +120,9 @@ function activate(context) {
                 if (now - lastTypingTime < 500) {
                     if (!typingTimer) {
                         typingTimer = setTimeout(() => {
-                            playSound(MESSAGES.continuousTyping);
+                            playSound("typing");
                             typingTimer = null;
-                        }, 5000); // 5 seconds of continuous typing
+                        }, 60000); // 60 seconds of continuous typing
                     }
                 } else {
                     if (typingTimer) {
@@ -142,14 +168,24 @@ function activate(context) {
     );
 }
 
-function playSound(soundFile) {
-    const player = require('play-sound')();
-    const soundPath = path.join(__dirname, 'sounds', soundFile);
-    player.play(soundPath, (err) => {
+function playSound(category) {
+    const soundFiles = MESSAGES[category];
+    const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
+    const player = require("sound-play");
+    const soundPath = path.join(__dirname, 'sounds', randomSound);
+    
+    const config = vscode.workspace.getConfiguration('rubberDuckPlusPlus');
+    if (!config.get('enabled')) {
+        return;
+    }
+
+    vscode.window.showInformationMessage("Starting sound...");
+    /*player.play(soundPath, { volume: config.get('volume') }, (err) => {
         if (err) {
             console.error(`Error playing sound: ${err}`);
         }
-    });
+    });*/
+    player.play(soundPath, config.get('volume'));
 }
 
 function deactivate() {
